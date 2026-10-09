@@ -1,0 +1,24 @@
+#include <k_map.h>
+
+int main(int argc, char** argv)
+{
+	try {
+		Truth_table<uint1024_t> table;
+		table.generate(4, static_cast<uint1024_t>(0xEE));
+		table.print();
+
+		K_map<uint1024_t> map;
+		map.print();
+		auto codes {map.make_gray_code(6)};
+		for(const auto& code : codes) {
+			code.print_bits(6); 
+		}
+
+		return 0;
+	}
+	catch(const std::exception& ex) {
+		std::cout << "ERROR:\t" << ex.what() << std::endl;
+		return 1;
+	}
+}
+
