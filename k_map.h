@@ -123,6 +123,9 @@ class Truth_table {
 
 template<typename T>
 class K_map {
+	//bool func MSB argument contains in column
+	//result vector LSB is 0 of truth table
+
 	public:
 		void print()
 		{
@@ -141,11 +144,65 @@ class K_map {
 			int codes_count {pow2<int>(bit_count)};	
 			for(T i = 0; i < codes_count; ++i) {
 				T temp {i ^ (i >> 1)}; // ^ is XOR
-				codes.push_back(temp); // ^ is XOR
+				codes.push_back(temp);
 			}
 			return codes;
 		}
+
+		std::array<int, 2> split_to_halfs(int num)
+		{
+			if(num<2) {
+				throw std::runtime_error {"the num for splitting by halfs is < 2"};
+			}
+			int lower {num/2};
+			int higher {num - lower};
+			return {higher, lower};
+		}
+
+		void make_map_head(int func_args_count)
+		{
+			auto [row_args_count, column_args_count] {split_to_halfs(func_args_count)};
+			gray_code_row = make_gray_code(row_args_count);
+			gray_code_column = make_gray_code(column_args_count);
+		}
+
+		Boolnum<T> combine_column_row_code(int column, int row)
+		{
+			//GOVNO
+			Boolnum<T> code {0};
+			int code_bit_num {0};
+			for(const auto& bit : row) {
+				code.setbit(code_bit_num, bit)
+				++code_bit_num;
+			}
+			int code_bit_num {0}
+			for(const auto& bit : column) {
+				code.setbit(code_bit_num, bit)
+				++code_bit_num;
+			}
+			return code;
+		}
+		
+		void make_map(Truth_table<T> truth_table)
+		{
+			make_map_head(truth_table.args_count);
+
+			for(size_t column = 0; column < gray_code_column.size(); ++column) {
+				map_data.push_back({});
+				for(size_t row = 0; row < gray_code_row.size(); ++row) {
+					auto combined_code {combine_column_row_code(column, row)};
+					int combined_code_int static_cast<int>combined_code.getnum();
+					bool bit = truth_table.result_vector.getbit(combined_code_int);
+					map_data[column].push_back(bit);
+				}
+			}
+		}
+
 	private:
-		std::vector<std::vector<bool>> map_data {{1, 0},{0, 1, 1}};
+		std::vector<std::vector<bool>> map_data;
+		std::vector<Boolnum<T>> gray_code_row;
+		std::vector<Boolnum<T>> gray_code_column;
+
+		friend class MakeMapHead_Simple_Test;
 };
 
