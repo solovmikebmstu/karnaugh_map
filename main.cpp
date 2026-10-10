@@ -9,10 +9,6 @@ int main(int argc, char** argv)
 
 		K_map<uint1024_t> map;
 		map.print();
-		auto codes {map.make_gray_code(6)};
-		for(const auto& code : codes) {
-			code.print_bits(6); 
-		}
 
 		return 0;
 	}

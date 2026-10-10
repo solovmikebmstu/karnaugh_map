@@ -139,8 +139,8 @@ class K_map {
 		{
 			std::vector<Boolnum<T>> codes;
 			int codes_count {pow2<int>(bit_count)};	
-			for(uint1024_t i = 0; i < codes_count; ++i) {
-				uint1024_t temp {i ^ (i >> 1)}; // ^ is XOR
+			for(T i = 0; i < codes_count; ++i) {
+				T temp {i ^ (i >> 1)}; // ^ is XOR
 				codes.push_back(temp); // ^ is XOR
 			}
 			return codes;

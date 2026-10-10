@@ -2,3 +2,4 @@ Boost_1_84_0.zip
 multiprecision-Boost_1_84_0/
 boostlib
 *.out
+*.swp
