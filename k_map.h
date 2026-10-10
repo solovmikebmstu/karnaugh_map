@@ -12,13 +12,19 @@ using namespace boost::multiprecision;
 template <typename T>
 class Boolnum {
 	public:
-		Boolnum() {}
+		Boolnum() : bit_count{-1}, num{0} {}
 
-		Boolnum(T num) : num{num} {}
+		Boolnum(T num) : num{num}, bit_count{-1} {}
+
+		Boolnum(T num, int bit_count) : num{num}, bit_count{bit_count} {}
 
 		const T& getnum() const { return num; }
 
-		void setnum(T num) { this->num = num; }
+#if 1
+		void setnum(T num, int bit_count) { this->num = num; this->bit_count = bit_count; }
+
+		void setnum(T num) { this->num = num; this->bit_count = -1; }
+#endif
 	
 		bool getbit(int index) const
 		{
@@ -42,6 +48,15 @@ class Boolnum {
 	
 		void print() const { std::cout << num << std::endl; }
 		
+		void print_bits() const
+		{
+			check_bc_error();
+			for(int i = 0; i < bit_count; ++i) {
+				std::cout << getbit( (bit_count-1) - i );
+			}
+			std::cout << std::endl;
+		}
+
 		void print_bits(int bit_count) const
 		{
 			for(int i = 0; i < bit_count; ++i) {
@@ -52,6 +67,15 @@ class Boolnum {
 
 		bool operator<(const Boolnum& other) { return num < other.getnum(); }
 		bool operator>(const Boolnum& other) { return num > other.getnum(); }
+
+		void check_bc_error() const
+		{
+			if(bit_count == -1) {
+				throw std::runtime_error {"Boolnum bit_count should be not -1"};
+			}
+		}
+
+		int bit_count;
 
 	private:
 		T num;
@@ -105,14 +129,14 @@ class Truth_table {
 			if(args_count > max_bool_func_args) {
 				throw std::runtime_error{"bool func has too much args"};
 			}
-			this->result_vector.setnum(result_vector.getnum());
+			this->result_vector.setnum(result_vector.getnum(), rows_count);
 			this->args_count = args_count;
 		}
 
 		void print()
 		{
 			std::cout << "result vector:\t";
-			result_vector.print_bits(rows_count);
+			result_vector.print_bits();
 			std::cout << "args count:\t" << args_count << std::endl << "rows count:\t" << rows_count << std::endl;
 		}
 
@@ -120,6 +144,17 @@ class Truth_table {
 		int args_count;
 		int rows_count;
 };
+
+template<typename T>
+Boolnum<T> combine_Boolnums(const Boolnum<T>& msb, const Boolnum<T>& lsb)
+{
+	msb.check_bc_error();
+	lsb.check_bc_error();
+	Boolnum<T> res {(msb.getnum() << lsb.bit_count) + lsb.getnum()};
+	res.bit_count = msb.bit_count + lsb.bit_count;
+	return res;
+
+}
 
 template<typename T>
 class K_map {
@@ -144,7 +179,7 @@ class K_map {
 			int codes_count {pow2<int>(bit_count)};	
 			for(T i = 0; i < codes_count; ++i) {
 				T temp {i ^ (i >> 1)}; // ^ is XOR
-				codes.push_back(temp);
+				codes.push_back({temp, bit_count});
 			}
 			return codes;
 		}
@@ -166,23 +201,7 @@ class K_map {
 			gray_code_column = make_gray_code(column_args_count);
 		}
 
-		Boolnum<T> combine_column_row_code(int column, int row)
-		{
-			//GOVNO
-			Boolnum<T> code {0};
-			int code_bit_num {0};
-			for(const auto& bit : row) {
-				code.setbit(code_bit_num, bit)
-				++code_bit_num;
-			}
-			int code_bit_num {0}
-			for(const auto& bit : column) {
-				code.setbit(code_bit_num, bit)
-				++code_bit_num;
-			}
-			return code;
-		}
-		
+	
 		void make_map(Truth_table<T> truth_table)
 		{
 			make_map_head(truth_table.args_count);
@@ -190,9 +209,7 @@ class K_map {
 			for(size_t column = 0; column < gray_code_column.size(); ++column) {
 				map_data.push_back({});
 				for(size_t row = 0; row < gray_code_row.size(); ++row) {
-					auto combined_code {combine_column_row_code(column, row)};
-					int combined_code_int static_cast<int>combined_code.getnum();
-					bool bit = truth_table.result_vector.getbit(combined_code_int);
+					bool bit {0};
 					map_data[column].push_back(bit);
 				}
 			}

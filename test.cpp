@@ -66,11 +66,22 @@ TEST(MakeMapHead, Simple)
 TEST(MakeMap, Visualise)
 {
 	Truth_table<int> table;
-	table.generate(4, 0x2);
-	table.result_vector.printbit();
+	table.generate(4, 0b01010101);
+	table.result_vector.print_bits();
 
 	K_map<int> map;
 	map.make_map(table);
 	map.print();
+}
+
+TEST(CombineBoolnums, Simple)
+{
+	Boolnum<int> msb {0b01, 2};
+	Boolnum<int> lsb {0b101, 3};
+	Boolnum<int> res = combine_Boolnums(msb, lsb);
+	res.print_bits();
+	Boolnum<int> ref {0b01101, 5};
+	EXPECT_EQ(res.getnum(), ref.getnum());
+	EXPECT_EQ(res.bit_count, ref.bit_count);
 }
 
