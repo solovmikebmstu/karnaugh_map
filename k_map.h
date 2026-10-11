@@ -217,6 +217,15 @@ class K_map {
 			}
 		}
 
+		void make_direct(int func_args_count, const std::vector<std::vector<bool>>& data)
+		{
+			make_head(func_args_count);
+			if( (gray_code_column.size() != data.size()) || (gray_code_row.size() != data[0].size()) ) {
+				throw std::runtime_error {"in make_direct func, count of func args not matched with given data"};
+			}
+			this->data = data;
+		}
+
 	private:
 		std::vector<std::vector<bool>> data;
 		std::vector<Boolnum<T>> gray_code_row;
@@ -224,5 +233,6 @@ class K_map {
 
 		friend class MakeMapHead_Simple_Test;
 		friend class MakeMap_Simple_Test;
+		friend class MapMakeDirect_Simple_Test;
 };
 

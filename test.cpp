@@ -109,3 +109,19 @@ TEST(CombineBoolnums, Simple)
 	EXPECT_EQ(res.bit_count, ref.bit_count);
 }
 
+TEST(MapMakeDirect, Simple)
+{
+	std::vector<std::vector<bool>> ref {{0,0,1,0},
+					    {0,1,1,1},
+					    {1,1,1,0},
+					    {0,1,1,0}};
+
+	K_map<int> map;
+	map.make_direct(4, ref);
+#if 0
+	map.print();
+#endif
+	EXPECT_EQ(map.data.size(), ref.size());
+	EXPECT_EQ(map.data[0].size(), ref[0].size());
+
+}
