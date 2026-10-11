@@ -165,7 +165,7 @@ class K_map {
 		void print()
 		{
 			std::cout << std::endl;
-			for(const auto& row : map_data) {
+			for(const auto& row : data) {
 				for(const auto& bit : row) {
 					std::cout << bit << "   ";
 				}
@@ -194,7 +194,7 @@ class K_map {
 			return {higher, lower};
 		}
 
-		void make_map_head(int func_args_count)
+		void make_head(int func_args_count)
 		{
 			auto [row_args_count, column_args_count] {split_to_halfs(func_args_count)};
 			gray_code_row = make_gray_code(row_args_count);
@@ -202,24 +202,27 @@ class K_map {
 		}
 
 	
-		void make_map(Truth_table<T> truth_table)
+		void make(Truth_table<T> truth_table)
 		{
-			make_map_head(truth_table.args_count);
+			make_head(truth_table.args_count);
 
-			for(size_t column = 0; column < gray_code_column.size(); ++column) {
-				map_data.push_back({});
-				for(size_t row = 0; row < gray_code_row.size(); ++row) {
-					bool bit {0};
-					map_data[column].push_back(bit);
+			for(size_t row = 0; row < gray_code_column.size(); ++row) {
+				data.push_back({});
+				for(size_t column = 0; column < gray_code_row.size(); ++column) {
+					Boolnum<T> combined_gray_code = combine_Boolnums(gray_code_column[row], gray_code_row[column]);
+					auto index = combined_gray_code.getnum();
+					bool bit = truth_table.result_vector.getbit(static_cast<int>(index)); //TODO
+					data[row].push_back(bit);
 				}
 			}
 		}
 
 	private:
-		std::vector<std::vector<bool>> map_data;
+		std::vector<std::vector<bool>> data;
 		std::vector<Boolnum<T>> gray_code_row;
 		std::vector<Boolnum<T>> gray_code_column;
 
 		friend class MakeMapHead_Simple_Test;
+		friend class MakeMap_Simple_Test;
 };
 

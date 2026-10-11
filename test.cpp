@@ -57,21 +57,45 @@ TEST(SplitToHalfs, val)
 TEST(MakeMapHead, Simple)
 {
 	K_map<uint1024_t> map;
-	map.make_map_head(5);
+	map.make_head(5);
 	EXPECT_EQ(map.gray_code_row.size(), 8);
 	EXPECT_EQ(map.gray_code_column.size(), 4);
 	
 }
 
-TEST(MakeMap, Visualise)
+TEST(MakeMap, Simple)
 {
-	Truth_table<int> table;
-	table.generate(4, 0b01010101);
-	table.result_vector.print_bits();
+	Truth_table<uint1024_t> table;
+	table.generate(4, static_cast<uint1024_t>(0b1011101011101000));
 
-	K_map<int> map;
-	map.make_map(table);
+	K_map<uint1024_t> map;
+	map.make(table);
+
+	std::vector<std::vector<bool>> ref {{0,0,1,0},
+					    {0,1,1,1},
+					    {1,1,1,0},
+					    {0,1,1,0}};
+
+	EXPECT_EQ(map.data.size(), ref.size());
+	EXPECT_EQ(map.data[0].size(), ref[0].size());
+#if 1
+	int column_index {0};
+	int row_index {0};
+	for(const auto& row : map.data) {
+		for(const auto& column : row) {
+			EXPECT_EQ(column, ref[row_index][column_index]);
+			++column_index;
+		}
+		column_index = 0;
+		++row_index;
+	}
+#endif
+#if 0
+	table.result_vector.print_bits();
+	table.result_vector.print();
 	map.print();
+	print_container(map.data[3]);
+#endif
 }
 
 TEST(CombineBoolnums, Simple)
@@ -79,7 +103,7 @@ TEST(CombineBoolnums, Simple)
 	Boolnum<int> msb {0b01, 2};
 	Boolnum<int> lsb {0b101, 3};
 	Boolnum<int> res = combine_Boolnums(msb, lsb);
-	res.print_bits();
+//	res.print_bits();
 	Boolnum<int> ref {0b01101, 5};
 	EXPECT_EQ(res.getnum(), ref.getnum());
 	EXPECT_EQ(res.bit_count, ref.bit_count);

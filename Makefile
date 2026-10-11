@@ -1,6 +1,6 @@
 COMPILER = g++
 GENERAL_FLAGS = -g -std=c++17
-GTEST_FLAGS = -lgtest -lgtest_main -O0
+GTEST_FLAGS = -lgtest -lgtest_main
 BOOSTLIB_FLAGS = -I multiprecision-Boost_1_84_0/include -DBOOST_MP_STANDALONE
 INCLUDE_PATH_FLAGS = -I ./
 
