@@ -1,3 +1,3 @@
-reqire:
+require:
 
-gtest lcov
+gtest

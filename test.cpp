@@ -38,11 +38,6 @@ TEST(GrayCode, FourBit)
 	EXPECT_EQ(code.getnum(), ref.getnum());
 }
 
-TEST(Cout, HelloWorld)
-{
-	std::cout << "hello world!" << std::endl;
-}
-
 TEST(SplitToHalfs, val)
 {
 	K_map<uint8_t> map;
@@ -125,3 +120,55 @@ TEST(MapMakeDirect, Simple)
 	EXPECT_EQ(map.data[0].size(), ref[0].size());
 
 }
+
+TEST(MapMake, Visualise)
+{
+	Truth_table<uint1024_t> table;
+	table.generate(7, static_cast<uint1024_t>(0));
+
+	K_map<uint1024_t> map;
+	map.make(table);
+#if 0
+	map.print();
+	std::cout << "row size:\t" << map.max_size.row << std::endl
+		<< "column size:\t" << map.max_size.column << std::endl;
+#endif
+}
+
+TEST(GenerateConjuctionSizes, Simple)
+{
+	Truth_table<uint1024_t> table;
+	table.generate(4, static_cast<uint1024_t>(0));
+
+	K_map<uint1024_t> map;
+	map.make(table);
+	map.generate_conjuction_sizes();
+
+	std::vector<row_column> ref {{4,4},
+				     {2,4},{4,2},
+				     {1,4},{2,2},{4,1},
+				     {1,2},{2,1},
+				     {1,1}};
+	size_t i {0};
+	for(const auto& v : map.conjunctions_sizes) {
+		EXPECT_EQ(v.row, ref[i].row);
+		EXPECT_EQ(v.column, ref[i].column);
+		++i;
+	}
+
+#if 0
+	print_container(map.conjunctions_sizes);
+	map.print();
+	std::cout << "row size:\t" << map.max_size.row << std::endl
+		<< "column size:\t" << map.max_size.column << std::endl;
+#endif
+
+}
+
+TEST(Log2, Values)
+{
+	EXPECT_EQ(log2(512), 9);
+	EXPECT_EQ(log2(4), 2);
+	EXPECT_EQ(log2(1), 0);
+}
+

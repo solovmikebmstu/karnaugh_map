@@ -96,6 +96,20 @@ T pow2(int pow)
 	return num << pow;
 }
 
+int log2(int num)
+{
+	int i {num};
+	int res {0};
+	for (; ; ++res) {
+		i = i >> 1;
+		if(i == 0) {break;}
+	}
+	if(num != pow2<int>(res)) {
+		throw std::runtime_error {"log2 func arg should be power of 2"};
+	}
+	return res;
+}
+
 template<typename T>
 std::vector<T> get_pow2_vector(int max_pow)
 {
@@ -111,6 +125,17 @@ void print_container(const T& c)
 {
 	for(const auto& val : c) {
 		std::cout << val << std::endl;
+	}
+}
+
+template<typename T>
+void print_container2(const T& c)
+{
+	for(const auto& row : c) {
+		for(const auto& val : c) {
+			std::cout << val << "\t";
+		}
+		std::cout << std::endl;
 	}
 }
 
@@ -156,6 +181,12 @@ Boolnum<T> combine_Boolnums(const Boolnum<T>& msb, const Boolnum<T>& lsb)
 
 }
 
+struct row_column {
+	int row;
+	int column;
+	};
+
+
 template<typename T>
 class K_map {
 	//bool func MSB argument contains in column
@@ -199,9 +230,28 @@ class K_map {
 			auto [row_args_count, column_args_count] {split_to_halfs(func_args_count)};
 			gray_code_row = make_gray_code(row_args_count);
 			gray_code_column = make_gray_code(column_args_count);
+
+			max_size.row = static_cast<int>(gray_code_row.size());
+			max_size.column = static_cast<int>(gray_code_column.size());
 		}
 
 	
+		void generate_conjuction_sizes()
+		{
+			int max_area_size = max_size.row * max_size.column;
+			std::vector<int> conjuctions_area_sizes = get_pow2_vector<int>(log2(max_area_size));
+
+			for(int area_size_index = conjuctions_area_sizes.size() - 1; area_size_index >= 0 ; --area_size_index) { 
+				for(int columnsize {1}, rowsize {1}; ; rowsize = rowsize << 1) {
+					columnsize = conjuctions_area_sizes[area_size_index] / rowsize;
+					if(columnsize < 1) {break;}
+					if(columnsize <= max_size.column && rowsize <= max_size.row) {
+					conjunctions_sizes.push_back({rowsize, columnsize});		
+					}
+				}
+			}
+		}
+
 		void make(Truth_table<T> truth_table)
 		{
 			make_head(truth_table.args_count);
@@ -211,7 +261,7 @@ class K_map {
 				for(size_t column = 0; column < gray_code_row.size(); ++column) {
 					Boolnum<T> combined_gray_code = combine_Boolnums(gray_code_column[row], gray_code_row[column]);
 					auto index = combined_gray_code.getnum();
-					bool bit = truth_table.result_vector.getbit(static_cast<int>(index)); //TODO
+					bool bit = truth_table.result_vector.getbit(static_cast<int>(index)); 
 					data[row].push_back(bit);
 				}
 			}
@@ -226,13 +276,27 @@ class K_map {
 			this->data = data;
 		}
 
+		std::vector<row_column> conjunctions_sizes;
+
 	private:
 		std::vector<std::vector<bool>> data;
+
 		std::vector<Boolnum<T>> gray_code_row;
 		std::vector<Boolnum<T>> gray_code_column;
+
+		row_column max_size;
 
 		friend class MakeMapHead_Simple_Test;
 		friend class MakeMap_Simple_Test;
 		friend class MapMakeDirect_Simple_Test;
+		friend class MapMake_Visualise_Test;
+		friend class GenerateConjuctionSizes_Simple_Test;
+
 };
 
+std::ostream& operator<<(std::ostream& os, const row_column& rc)
+{
+	os << "row:\t" << rc.row << "\t column:\t" << rc.column;
+	return os;
+}
+	
