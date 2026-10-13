@@ -265,6 +265,8 @@ class K_map {
 					data[row].push_back(bit);
 				}
 			}
+
+			generate_conjuction_sizes();
 		}
 
 		void make_direct(int func_args_count, const std::vector<std::vector<bool>>& data)
@@ -274,7 +276,21 @@ class K_map {
 				throw std::runtime_error {"in make_direct func, count of func args not matched with given data"};
 			}
 			this->data = data;
+			generate_conjuction_sizes();
 		}
+
+#if 0
+		void generate_conjunctions()
+		{
+			conjunction_corner_position = {0, 0};	
+
+			for(const auto& conjunction_size : conjunctions_sizes) {
+				if(check_conjunction_availability(conjunction_corner_position, conjunction_size)) {
+					generate_conjunction(conjunction_corner_position, conjunction_size);
+				}
+			}
+		}
+#endif
 
 		std::vector<row_column> conjunctions_sizes;
 
@@ -285,6 +301,8 @@ class K_map {
 		std::vector<Boolnum<T>> gray_code_column;
 
 		row_column max_size;
+
+		row_column conjunction_corner_position;
 
 		friend class MakeMapHead_Simple_Test;
 		friend class MakeMap_Simple_Test;

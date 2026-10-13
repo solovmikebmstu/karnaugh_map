@@ -142,7 +142,7 @@ TEST(GenerateConjuctionSizes, Simple)
 
 	K_map<uint1024_t> map;
 	map.make(table);
-	map.generate_conjuction_sizes();
+//	map.generate_conjuction_sizes();
 
 	std::vector<row_column> ref {{4,4},
 				     {2,4},{4,2},
@@ -156,7 +156,7 @@ TEST(GenerateConjuctionSizes, Simple)
 		++i;
 	}
 
-#if 0
+#if 1
 	print_container(map.conjunctions_sizes);
 	map.print();
 	std::cout << "row size:\t" << map.max_size.row << std::endl
