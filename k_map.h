@@ -9,6 +9,8 @@ constexpr int max_bool_func_args {10};
 
 using namespace boost::multiprecision;
 
+using BoolTable = std::vector<std::vector<bool>>;
+
 template <typename T>
 class Boolnum {
 	public:
@@ -132,7 +134,7 @@ template<typename T>
 void print_container2(const T& c)
 {
 	for(const auto& row : c) {
-		for(const auto& val : c) {
+		for(const auto& val : row) {
 			std::cout << val << "\t";
 		}
 		std::cout << std::endl;
@@ -193,14 +195,13 @@ class K_map {
 	//result vector LSB is 0 of truth table
 
 	public:
-		void print()
+		void print(int conjunction_index = -1)
 		{
-			std::cout << std::endl;
-			for(const auto& row : data) {
-				for(const auto& bit : row) {
-					std::cout << bit << "   ";
-				}
-				std::cout << std::endl << std::endl;
+			if(conjunction_index == -1) {
+				uni_print_(data);
+			}
+			else {
+				uni_print_(conjunctions[conjunction_index]);
 			}
 		}
 
@@ -279,10 +280,79 @@ class K_map {
 			generate_conjuction_sizes();
 		}
 
+		void fill_zeros(std::vector<std::vector<bool>>& conjunction)
+		{
+			for(int row = 0; row < max_size.column; ++row) {
+				conjunction.push_back({});
+				for(int column = 0; column < max_size.row; ++column) {
+					conjunction[row].push_back(false);
+				}
+			}
+		}
+
+		enum class Dir { 
+			UP,
+			DOWN,
+			LEFT,
+			RIGHT
+		};
+
+		void step(row_column& point, Dir dir)
+		{
+			switch(dir) {
+				case Dir::UP:
+					if(point.row == 0) {
+						point.row = max_size.row - 1;
+					}
+					else { --point.row; }
+					break;
+				case Dir::DOWN:
+					if(point.row == (max_size.row - 1)) {
+						point.row = 0;
+					}
+					else { ++point.row; }
+					break;
+				case Dir::LEFT:
+					if(point.column == 0) {
+						point.column = max_size.column - 1;
+					}
+					else { --point.column; }
+					break;
+				case Dir::RIGHT:
+					if(point.column == (max_size.column - 1)) {
+						point.column = 0;
+					}
+					else { ++point.column; }
+					break;
+			}
+		}
+
+		void generate_conjunction(row_column conjunction_corner_position, row_column conjunction_size)
+		{
+			auto& sz = conjunction_size;
+			auto& cr = conjunction_corner_position;
+
+			std::vector<std::vector<bool>> conjunction;
+			fill_zeros(conjunction);
+			row_column point {cr.row, cr.column};
+
+			for(int i = cr.row; i < (cr.row + sz.column); ++i) {
+				int j {0};
+				for(j = cr.column; j < (cr.column + sz.row); ++j) {
+					conjunction[point.row][point.column] = true;
+					step(point, Dir::RIGHT);
+				}
+				for(; j > cr.column; --j) { step(point, Dir::LEFT); }
+				step(point, Dir::DOWN);
+			}
+
+			conjunctions.push_back(conjunction);
+		}
+
 #if 0
 		void generate_conjunctions()
 		{
-			conjunction_corner_position = {0, 0};	
+			row_column conjunction_corner_position = {0, 0};	
 
 			for(const auto& conjunction_size : conjunctions_sizes) {
 				if(check_conjunction_availability(conjunction_corner_position, conjunction_size)) {
@@ -295,20 +365,33 @@ class K_map {
 		std::vector<row_column> conjunctions_sizes;
 
 	private:
+		void uni_print_(const std::vector<std::vector<bool>>& container)
+		{
+			std::cout << std::endl;
+			for(const auto& row : container) {
+				for(const auto& bit : row) {
+					std::cout << bit << "   ";
+				}
+				std::cout << std::endl << std::endl;
+			}
+		}
+
+
 		std::vector<std::vector<bool>> data;
+
+		std::vector<std::vector<std::vector<bool>>> conjunctions;
 
 		std::vector<Boolnum<T>> gray_code_row;
 		std::vector<Boolnum<T>> gray_code_column;
 
 		row_column max_size;
 
-		row_column conjunction_corner_position;
-
 		friend class MakeMapHead_Simple_Test;
 		friend class MakeMap_Simple_Test;
 		friend class MapMakeDirect_Simple_Test;
 		friend class MapMake_Visualise_Test;
 		friend class GenerateConjuctionSizes_Simple_Test;
+		friend class GenerateConjunction_Simple_Test;
 
 };
 

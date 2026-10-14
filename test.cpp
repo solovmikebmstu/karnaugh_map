@@ -156,7 +156,7 @@ TEST(GenerateConjuctionSizes, Simple)
 		++i;
 	}
 
-#if 1
+#if 0
 	print_container(map.conjunctions_sizes);
 	map.print();
 	std::cout << "row size:\t" << map.max_size.row << std::endl
@@ -170,5 +170,49 @@ TEST(Log2, Values)
 	EXPECT_EQ(log2(512), 9);
 	EXPECT_EQ(log2(4), 2);
 	EXPECT_EQ(log2(1), 0);
+}
+
+K_map<uint1024_t>& make_map(int argc)
+{
+	static Truth_table<uint1024_t> table;
+	table.generate(argc, static_cast<uint1024_t>(0));
+
+	static K_map<uint1024_t> map;
+	map.make(table);
+	return map;
+}
+
+void check_table(const std::vector<std::vector<bool>>& table,
+		const std::vector<std::vector<bool>>& ref)
+{
+
+	EXPECT_EQ(table.size(), ref.size());
+	EXPECT_EQ(table[0].size(), ref[0].size());
+	int column_index {0};
+	int row_index {0};
+	for(const auto& row : table) {
+		for(const auto& column : row) {
+			EXPECT_EQ(column, ref[row_index][column_index]);
+			++column_index;
+		}
+		column_index = 0;
+		++row_index;
+	}
+}
+
+TEST(GenerateConjunction, Simple)
+{
+	auto map = make_map(4);
+	map.generate_conjunction({3,3},{2,3});
+
+	BoolTable ref {{1,0,0,1},
+		       {1,0,0,1},
+		       {0,0,0,0},
+		       {1,0,0,1}};
+//	check_table(map.conjunctions[0], ref);
+#if 0
+	map.print();
+	map.print(0);
+#endif
 }
 
