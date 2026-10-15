@@ -16,9 +16,9 @@ class Boolnum {
 	public:
 		Boolnum() : bit_count{-1}, num{0} {}
 
-		Boolnum(T num) : num{num}, bit_count{-1} {}
+		Boolnum(T num) : bit_count{-1}, num{num} {}
 
-		Boolnum(T num, int bit_count) : num{num}, bit_count{bit_count} {}
+		Boolnum(T num, int bit_count) : bit_count{bit_count}, num{num} {}
 
 		const T& getnum() const { return num; }
 
@@ -198,10 +198,10 @@ class K_map {
 		void print(int conjunction_index = -1)
 		{
 			if(conjunction_index == -1) {
-				uni_print_(data);
+				uni_print_(data, "1", "0");
 			}
 			else {
-				uni_print_(conjunctions[conjunction_index]);
+				uni_print_(conjunctions[conjunction_index], "+", ".");
 			}
 		}
 
@@ -349,7 +349,27 @@ class K_map {
 			conjunctions.push_back(conjunction);
 		}
 
-#if 0
+		bool check_conjunction_availability(row_column conjunction_corner_position, row_column conjunction_size)
+		{
+			auto &sz = conjunction_size;
+			auto &cr = conjunction_corner_position;
+			
+			row_column point {cr.row, cr.column};
+
+			for(int i = cr.row; i < (cr.row + sz.column); ++i) {
+				int j {0};
+				for(j = cr.column; j < (cr.column + sz.row); ++j) {
+					if(data[point.row][point.column] == 0) { return false; }
+					step(point, Dir::RIGHT);
+				}
+				for(; j > cr.column; --j) { step(point, Dir::LEFT); }
+				step(point, Dir::DOWN);
+			}
+			return true;
+
+		}
+
+#if 1
 		void generate_conjunctions()
 		{
 			row_column conjunction_corner_position = {0, 0};	
@@ -365,12 +385,12 @@ class K_map {
 		std::vector<row_column> conjunctions_sizes;
 
 	private:
-		void uni_print_(const std::vector<std::vector<bool>>& container)
+		void uni_print_(const std::vector<std::vector<bool>>& container, const char* pos, const char* neg)
 		{
 			std::cout << std::endl;
 			for(const auto& row : container) {
 				for(const auto& bit : row) {
-					std::cout << bit << "   ";
+					std::cout << (bit ? pos : neg) << "   ";
 				}
 				std::cout << std::endl << std::endl;
 			}
@@ -400,4 +420,4 @@ std::ostream& operator<<(std::ostream& os, const row_column& rc)
 	os << "row:\t" << rc.row << "\t column:\t" << rc.column;
 	return os;
 }
-	
+

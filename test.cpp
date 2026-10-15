@@ -209,8 +209,24 @@ TEST(GenerateConjunction, Simple)
 		       {1,0,0,1},
 		       {0,0,0,0},
 		       {1,0,0,1}};
-//	check_table(map.conjunctions[0], ref);
+	check_table(map.conjunctions[0], ref);
 #if 0
+	map.print();
+	map.print(0);
+#endif
+}
+
+TEST(GenerateConjunctions, Simple)
+{
+	BoolTable values {{1,1,0,1},
+			  {1,1,0,1},
+			  {0,0,0,0},
+			  {1,0,0,1}};
+
+	K_map<uint1024_t> map;
+	map.make_direct(4, values);
+	map.generate_conjunctions();
+#if 1
 	map.print();
 	map.print(0);
 #endif
