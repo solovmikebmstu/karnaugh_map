@@ -191,7 +191,6 @@ struct row_column {
 
 template<typename T>
 class K_map {
-	//bool func MSB argument contains in column
 	//result vector LSB is 0 of truth table
 
 	public:
@@ -202,6 +201,16 @@ class K_map {
 			}
 			else {
 				uni_print_(conjunctions[conjunction_index], "+", ".");
+			}
+		}
+
+		void print_conjunctions()
+		{
+			int conjunction_index {0};
+			for( [[maybe_unused]]const auto& conjunction : conjunctions) {
+				std::cout << "conjuncion " << conjunction_index << std::endl; 
+				print(conjunction_index);
+				++conjunction_index;
 			}
 		}
 
@@ -332,7 +341,7 @@ class K_map {
 			auto& sz = conjunction_size;
 			auto& cr = conjunction_corner_position;
 
-			std::vector<std::vector<bool>> conjunction;
+			BoolTable conjunction;
 			fill_zeros(conjunction);
 			row_column point {cr.row, cr.column};
 
@@ -355,15 +364,28 @@ class K_map {
 			auto &cr = conjunction_corner_position;
 			
 			row_column point {cr.row, cr.column};
+			std::vector<int> cbc; //cbc is conjunction bit count
+			for([[maybe_unused]] const auto& v : this->conjunctions) {
+				cbc.push_back(0);
+			}
 
 			for(int i = cr.row; i < (cr.row + sz.column); ++i) {
 				int j {0};
 				for(j = cr.column; j < (cr.column + sz.row); ++j) {
 					if(data[point.row][point.column] == 0) { return false; }
+					for(size_t ci = 0; ci < this->conjunctions.size(); ++ci) { // ci is conjunction index
+						if(conjunctions[ci][point.row][point.column] == 1) {
+							++cbc[ci];
+						}
+					}
 					step(point, Dir::RIGHT);
 				}
 				for(; j > cr.column; --j) { step(point, Dir::LEFT); }
 				step(point, Dir::DOWN);
+			}
+			int conjunction_area = conjunction_size.row * conjunction_size.column;
+			for(const auto& val : cbc) {
+				if(val >= conjunction_area) { return false; }
 			}
 			return true;
 
@@ -374,10 +396,17 @@ class K_map {
 		{
 			row_column conjunction_corner_position = {0, 0};	
 
-			for(const auto& conjunction_size : conjunctions_sizes) {
-				if(check_conjunction_availability(conjunction_corner_position, conjunction_size)) {
-					generate_conjunction(conjunction_corner_position, conjunction_size);
+			for(int row = 0; row < max_size.column; ++row) {
+				for(int column = 0; column < max_size.row; ++column) {
+					for(const auto& conjunction_size : conjunctions_sizes) {
+						if(check_conjunction_availability(conjunction_corner_position, conjunction_size)) {
+							generate_conjunction(conjunction_corner_position, conjunction_size);
+						}
+					}
+					++conjunction_corner_position.column;
 				}
+				conjunction_corner_position.column = 0;
+				++conjunction_corner_position.row;
 			}
 		}
 #endif
@@ -385,7 +414,7 @@ class K_map {
 		std::vector<row_column> conjunctions_sizes;
 
 	private:
-		void uni_print_(const std::vector<std::vector<bool>>& container, const char* pos, const char* neg)
+		void uni_print_(const BoolTable& container, const char* pos, const char* neg)
 		{
 			std::cout << std::endl;
 			for(const auto& row : container) {
@@ -397,9 +426,9 @@ class K_map {
 		}
 
 
-		std::vector<std::vector<bool>> data;
+		BoolTable data;
 
-		std::vector<std::vector<std::vector<bool>>> conjunctions;
+		std::vector<BoolTable> conjunctions;
 
 		std::vector<Boolnum<T>> gray_code_row;
 		std::vector<Boolnum<T>> gray_code_column;
@@ -412,6 +441,7 @@ class K_map {
 		friend class MapMake_Visualise_Test;
 		friend class GenerateConjuctionSizes_Simple_Test;
 		friend class GenerateConjunction_Simple_Test;
+		friend class GenerateConjunctions_FourByFour_Test;
 
 };
 

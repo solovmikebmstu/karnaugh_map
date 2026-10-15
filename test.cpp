@@ -216,19 +216,28 @@ TEST(GenerateConjunction, Simple)
 #endif
 }
 
-TEST(GenerateConjunctions, Simple)
+TEST(GenerateConjunctions, FourByFour)
 {
-	BoolTable values {{1,1,0,1},
-			  {1,1,0,1},
-			  {0,0,0,0},
-			  {1,0,0,1}};
+	BoolTable values {{0,0,1,0},
+			  {0,1,1,1},
+			  {1,1,1,1},
+			  {0,1,1,1}};
 
 	K_map<uint1024_t> map;
 	map.make_direct(4, values);
 	map.generate_conjunctions();
-#if 1
+	EXPECT_EQ(map.conjunctions.size(), 6);
+
+	BoolTable ref {{0,0,0,0},
+		       {0,0,1,1},
+		       {0,0,1,1},
+		       {0,0,0,0}};
+
+	EXPECT_EQ(map.conjunctions[2], ref);
+
+#if 0
 	map.print();
-	map.print(0);
+	map.print_conjunctions();
 #endif
 }
 
