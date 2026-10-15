@@ -2,11 +2,11 @@
 
 void example1(int argc, const BoolTable& data)
 {
-	K_map<> map1 {argc, data}; 
+	K_map<> map {argc, data}; 
        	//first argument is count of bool function arguments
 
-	map1.print();
-	map1.print_conjunctions();
+	map.print();
+	map.print_conjunctions();
 }
 
 void example2(int argc, Boolnum<>& vector)
@@ -16,9 +16,9 @@ void example2(int argc, Boolnum<>& vector)
 	//second is a bool function result vector,
 	//in this vector least significant bit is a result of first row in truth table
 
-	K_map<> map2 {table};
-	map2.print();
-	map2.print_conjunctions();
+	K_map<> map {table};
+	map.print();
+	map.print_conjunctions();
 }
 
 int main()
