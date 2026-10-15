@@ -11,7 +11,7 @@ using namespace boost::multiprecision;
 
 using BoolTable = std::vector<std::vector<bool>>;
 
-template <typename T>
+template <typename T = uint1024_t>
 class Boolnum {
 	public:
 		Boolnum() : bit_count{-1}, num{0} {}
@@ -19,6 +19,8 @@ class Boolnum {
 		Boolnum(T num) : bit_count{-1}, num{num} {}
 
 		Boolnum(T num, int bit_count) : bit_count{bit_count}, num{num} {}
+
+		Boolnum(const char* str) : bit_count{-1}, num{str} {}
 
 		const T& getnum() const { return num; }
 
@@ -141,10 +143,15 @@ void print_container2(const T& c)
 	}
 }
 
-template<typename T>
+template<typename T = uint1024_t>
 class Truth_table {
 	public:
 		Truth_table() : result_vector{0}, args_count{0}, rows_count{0} {}
+
+		Truth_table(int args_count, const Boolnum<T>& result_vector)
+		{
+			generate(args_count, result_vector);
+		}
 
 		void generate(int args_count, const Boolnum<T>& result_vector)
 		{
@@ -189,11 +196,25 @@ struct row_column {
 	};
 
 
-template<typename T>
+template<typename T = uint1024_t>
 class K_map {
 	//result vector LSB is 0 of truth table
 
 	public:
+		K_map() {}
+
+		K_map(Truth_table<T> truth_table)
+		{
+			make(truth_table);
+			generate_conjunctions();
+		}
+
+		K_map(int func_args_count, const BoolTable& data)
+		{
+			make_direct(func_args_count, data);
+			generate_conjunctions();
+		}
+
 		void print(int conjunction_index = -1)
 		{
 			if(conjunction_index == -1) {
@@ -279,7 +300,7 @@ class K_map {
 			generate_conjuction_sizes();
 		}
 
-		void make_direct(int func_args_count, const std::vector<std::vector<bool>>& data)
+		void make_direct(int func_args_count, const BoolTable& data)
 		{
 			make_head(func_args_count);
 			if( (gray_code_column.size() != data.size()) || (gray_code_row.size() != data[0].size()) ) {
@@ -311,24 +332,24 @@ class K_map {
 			switch(dir) {
 				case Dir::UP:
 					if(point.row == 0) {
-						point.row = max_size.row - 1;
+						point.row = max_size.column - 1;
 					}
 					else { --point.row; }
 					break;
 				case Dir::DOWN:
-					if(point.row == (max_size.row - 1)) {
+					if(point.row == (max_size.column - 1)) {
 						point.row = 0;
 					}
 					else { ++point.row; }
 					break;
 				case Dir::LEFT:
 					if(point.column == 0) {
-						point.column = max_size.column - 1;
+						point.column = max_size.row - 1;
 					}
 					else { --point.column; }
 					break;
 				case Dir::RIGHT:
-					if(point.column == (max_size.column - 1)) {
+					if(point.column == (max_size.row - 1)) {
 						point.column = 0;
 					}
 					else { ++point.column; }
@@ -394,19 +415,15 @@ class K_map {
 #if 1
 		void generate_conjunctions()
 		{
-			row_column conjunction_corner_position = {0, 0};	
-
-			for(int row = 0; row < max_size.column; ++row) {
-				for(int column = 0; column < max_size.row; ++column) {
-					for(const auto& conjunction_size : conjunctions_sizes) {
+			for(const auto& conjunction_size : conjunctions_sizes) {
+				for(int row = 0; row < max_size.column; ++row) {
+					for(int column = 0; column < max_size.row; ++column) {
+						row_column conjunction_corner_position = {row, column};
 						if(check_conjunction_availability(conjunction_corner_position, conjunction_size)) {
 							generate_conjunction(conjunction_corner_position, conjunction_size);
 						}
 					}
-					++conjunction_corner_position.column;
 				}
-				conjunction_corner_position.column = 0;
-				++conjunction_corner_position.row;
 			}
 		}
 #endif
